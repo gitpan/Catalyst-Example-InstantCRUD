@@ -29,6 +29,7 @@ WriteMakefile(
         'Catalyst::Plugin::Session::State::Cookie'               => 0,
         'Catalyst::Plugin::Session::Store::FastMmap'             => 0,
         'HTML::FormHandler::Generator::DBIC'                     => 0.02,
+        'HTML::FormHandler'                                      => 0.26,
         'Path::Class'                                            => 0,
 #        'version'                                                => 0,
 #        'URI::Escape'                                            => 0,
