@@ -23,7 +23,8 @@ sub mk_compclass {
 sub mk_controller {
     my( $helper, $class, $schema, $m2m ) = @_;
     $helper->{class} = $helper->{app} . '::Controller::' . $class;
-    (my $file = $helper->{file})  =~ s/InstantCRUD/$class/;
+    $helper->{base_pathpart} = lc $class;
+    (my $file = $helper->{file})  =~ s/InstantCRUD\.pm$/$class\.pm/;
     my $generator = HTML::FormHandler::Generator::DBIC->new( 
         schema => $schema, 
         class_prefix => $helper->{class}, 
@@ -72,6 +73,17 @@ use base "Catalyst::Example::Controller::InstantCRUD";
 [% END %]
 
 [% form_code %]
+
+__PACKAGE__->config(
+    action => {
+        list => { Chained => 'base', PathPart => q{}, Args => 0 },
+        view => { Chained => 'base' },
+        edit => { Chained => 'base' },
+        destroy => { Chained => 'base' },
+    },
+);
+
+sub base : Chained('/') PathPart('[% base_pathpart %]') CaptureArgs(0) {}
 
 1;
 

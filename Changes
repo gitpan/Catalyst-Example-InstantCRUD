@@ -1,5 +1,13 @@
 Revision history for Catalyst-Example-InstantCRUD
 
+0.036 Fri May 8, 2010
+    - stash the form obj instead the rendered state of it
+    - specify the columns explicitly by name at ->find call in model_item
+    - extend ordering to handle columns in a related class
+    - stash order_by_column_link coderef as a closure to avoid leaks
+    - Helper::Controller produces Chained action setup
+    - CRUD with just plain Catalyst actions, no :Local
+
 0.035 Fri Oct 16 08:30:08 CEST 2009 DSN into config (planned previously - the 0.29 Catalyst model helper drops dsn silently - so I was forced to do that change now)
 
 0.034 Wed Aug  5 19:09:22 CEST 2009 Redirection after delete, prereqs added

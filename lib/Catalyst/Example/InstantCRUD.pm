@@ -1,6 +1,6 @@
 package Catalyst::Example::InstantCRUD;
 
-$VERSION = '0.035';
+$VERSION = '0.036';
 
 use warnings;
 use strict;
@@ -99,6 +99,9 @@ Please report any bugs or feature requests to
 C<bug-catalyst-example-instantcrud@rt.cpan.org>, or through the web interface at
 L<http://rt.cpan.org>.
 
+=head1 CONTRIBUTORS
+
+wreis: Wallace Reis <wallace@reis.org.br>
 
 =head1 AUTHOR
 

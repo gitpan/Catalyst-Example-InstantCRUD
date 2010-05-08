@@ -5,6 +5,8 @@ BEGIN {
        extends 'Catalyst::Controller';
 }
 
+with 'Catalyst::Component::ContextClosure';
+
 use Carp;
 use Data::Dumper;
 use Path::Class;
@@ -25,7 +27,7 @@ sub build_form_class {
     return ref( $self ) . '::' . $self->source_name . 'Form';
 }
 
-sub auto : Local {
+sub auto : Action {
     my ( $self, $c ) = @_;
     $c->stash->{additional_template_paths} = [ dir( $c->config->{root}, lc $self->source_name) . '', $c->config->{root} . ''];
 }
@@ -33,7 +35,11 @@ sub auto : Local {
 sub model_item {
     my ( $self, $c, @pks ) = @_;
     my $rs = $self->model_resultset($c);
-    my $item = $rs->find( @pks, { key => 'primary' });
+    my @pk_columns = $rs->result_source->primary_columns;
+    my $data = {
+        map { $pk_columns[$_] => $pks[$_] } 0..$#pk_columns
+    };
+    my $item = $rs->find($data, { key => 'primary' });
     return $item;
 }
 
@@ -55,14 +61,16 @@ sub index : Private {
     $c->forward('list');
 }
 
-sub destroy : Local {
+sub destroy : Action {
     my ( $self, $c, @pks ) = @_;
     if ( $c->req->method eq 'POST' ) {
         $self->model_item( $c, @pks )->delete;
-        $c->res->redirect( $c->uri_for( 'list' ) );
+        $c->res->redirect(
+            $c->uri_for( $self->action_for('list') )
+        );
     }
     else {
-        my $action_uri = $c->uri_for( 'destroy', @pks);
+        my $action_uri = $c->uri_for( $self->action_for('destroy'), @pks);
         $c->stash->{destroywidget} = <<END;
 <form action="$action_uri" id="widget" method="post">
 <fieldset class="widget_fieldset">
@@ -73,7 +81,7 @@ END
     }
 }
 
-sub edit : Local {
+sub edit : Action {
     my ( $self, $c, @pks ) = @_; 
     my @ids;
     @ids = ( item_id => [ @pks ] ) if @pks;
@@ -82,10 +90,10 @@ sub edit : Local {
         params => $c->req->params, 
         @ids,
     );
+    my $item = $form->item;
     if( $c->req->method eq 'POST' && $form->process() ){
-        my $item = $form->item;
-        $c->res->redirect( $c->uri_for( 'view', $item->id ) );
-        $c->stash( item => $item );
+        $item = $form->item;
+        $c->res->redirect( $c->uri_for( $self->action_for('view'), $item->id ) );
     }
     if( @pks ){
         $form->field( 'submit' )->value( 'Update' );
@@ -94,10 +102,13 @@ sub edit : Local {
         $form->field( 'submit' )->value( 'Create' );
     }
 
-    $c->stash( form => $form->render );
+    $c->stash(
+        form => $form,
+        item => $item,
+    );
 }
 
-sub view : Local {
+sub view : Action {
     my ( $self, $c, @pks ) = @_;
     die "You need to pass an id" unless @pks;
     my $item = $self->model_item( $c, @pks );
@@ -107,14 +118,19 @@ sub view : Local {
 sub get_resultset {
     my ( $self, $c ) = @_;
     my $params = $c->request->params;
-    my $order  = $params->{'order'};
+    my $order = $params->{'order'};
     $order .= ' DESC' if $params->{'o2'};
+    my $join;
+    if ( $order && $order =~ m/(\w+)\.\w+/ ) {
+        $join = $1;
+    }
     my $maxrows = $c->config->{InstantCRUD}{maxrows} || 10;
     my $page = $params->{'page'} || 1;
     return $self->model_resultset($c)->search(
         {},
         {
             page     => $page,
+            $join ? ( join => $join ) : (),
             order_by => $order,
             rows     => $maxrows,
         }
@@ -124,24 +140,24 @@ sub get_resultset {
 sub create_col_link {
     my ( $self, $c, $source ) = @_;
     my $origparams = $c->request->params;
-    return sub {
-        my ( $column, $label ) = @_;
+    return $self->make_context_closure(sub {
+        my ( $ctx, $column, $label ) = @_;
         my $addr;
         no warnings 'uninitialized';
         if ( $origparams->{'order'} eq $column && !$origparams->{'o2'} ) {
-            $addr = $c->request->uri_with({ page => 1, order =>  $column, o2 => 'desc' });
+            $addr = $ctx->request->uri_with({ page => 1, order =>  $column, o2 => 'desc' });
         }else{
-            $addr = $c->request->uri_with({ page => 1, order =>  $column, o2 => undef });
+            $addr = $ctx->request->uri_with({ page => 1, order =>  $column, o2 => undef });
         }
         my $result = qq{<a href="$addr">$label</a>};
         if ( $origparams->{'order'} && $column eq $origparams->{'order'} ) {
             $result .= $origparams->{'o2'} ? "&darr;" : "&uarr;";
         }
         return $result;
-    };
+    }, $c);
 }
 
-sub list : Local {
+sub list : Action {
     my ( $self, $c ) = @_;
     my $result = $self->get_resultset($c);
     $c->stash->{pager}     = $result->pager;

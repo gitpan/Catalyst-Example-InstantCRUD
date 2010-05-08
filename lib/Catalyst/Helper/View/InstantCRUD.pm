@@ -50,13 +50,13 @@ sub mk_compclass {
     for my $class (@classes){
         my $classdir = dir( $helper->{dir}, 'root', lc $class );
         $helper->mk_dir( $classdir );
-        $helper->mk_file( file( $classdir, $_ . '.tt'), $helper->get_file( __PACKAGE__, $_ ) )
-        for qw/edit destroy/;
         $helper->{field_configs} = _get_column_config( $schema, $class, $m2m ) ;
         my $source = $schema->source($class);
         $helper->{primary_keys} = [ $source->primary_columns ];
-        $helper->render_file( list => file( $classdir, 'list.tt' ));
-        $helper->render_file( view => file( $classdir, 'view.tt' ));
+        $helper->{base_pathpart} = '/' . lc $class . '/';
+        foreach my $page (qw/list view edit destroy/) {
+            $helper->render_file( $page => file( $classdir, "${page}.tt" ));
+        }
     }
     return 1;
 }
@@ -185,15 +185,15 @@ __list__
     </td>
     <+ END +> 
     [% SET id = row.$pri %]
-    <td><a href="[% c.uri_for( <+ IF rest +>'by_id'<+ ELSE +>'view'<+ END +>, <+ FOR key = primary_keys +>row.<+ key +>, <+ END +> ) %]">View</a></td>
-    <td><a href="[% c.uri_for( <+ IF rest +>'by_id'<+ ELSE +>'edit'<+ END +>, <+ FOR key = primary_keys +>row.<+ key +>, <+ END +><+ IF rest +>,'edit'<+ END +> ) %]">Edit</a></td>
-    <td><a href="[% c.uri_for( <+ IF rest +>'by_id'<+ ELSE +>'destroy'<+ END +>, <+ FOR key = primary_keys +>row.<+ key +>, <+ END +><+ IF rest +>,'destroy'<+ END +> ) %]">Delete</a></td>
+    <td><a href="[% c.uri_for_action( '<+ base_pathpart +><+ IF rest +>by_id'<+ ELSE +>view'<+ END +>, [], <+ FOR key = primary_keys +>row.<+ key +>, <+ END +> ) %]">View</a></td>
+    <td><a href="[% c.uri_for_action( '<+ base_pathpart +><+ IF rest +>by_id'<+ ELSE +>edit'<+ END +>, [], <+ FOR key = primary_keys +>row.<+ key +>, <+ END +><+ IF rest +>,'edit'<+ END +> ) %]">Edit</a></td>
+    <td><a href="[% c.uri_for_action( '<+ base_pathpart +><+ IF rest +>by_id'<+ ELSE +>destroy'<+ END +>, [], <+ FOR key = primary_keys +>row.<+ key +>, <+ END +><+ IF rest +>,'destroy'<+ END +> ) %]">Delete</a></td>
     </tr>
 [% END %]
 </table>
 [% PROCESS pager.tt %]
 <br/>
-<a href="[% c.uri_for( '<+ IF rest +>create_form<+ ELSE +>edit<+ END +>' ) %]">Add</a>
+<a href="[% c.uri_for_action('<+ base_pathpart +><+ IF rest +>create_form<+ ELSE +>edit<+ END +>' ) %]">Add</a>
 
 __view__
 [% TAGS <+ +> %]
@@ -211,11 +211,24 @@ __view__
 </tr>
 <+ END +>
 </table>
-<hr />
-<a href="[% c.uri_for( 'edit', <+ FOR key = primary_keys +>item.<+ key +>, <+ END +> ) %]">Edit</a>
-<hr />
-<a href="[% c.uri_for( 'list' ) %]">List</a>
+<hr/>
+<a href="[% c.uri_for_action('<+ base_pathpart +>edit', <+ FOR key = primary_keys +>item.<+ key +>, <+ END +> ) %]">Edit</a>
+<hr/>
+<a href="[% c.uri_for_action('<+ base_pathpart +>list' ) %]">List</a>
 
+__edit__
+[% TAGS <+ +> %]
+[% widget %]
+<br>
+<a href="[% c.uri_for_action( '<+ base_pathpart +>list' ) %]">List</a>
+<hr>
+[% form.render %]
+
+__destroy__
+[% TAGS <+ +> %]
+[% destroywidget %]
+<br>
+<a href="[% c.uri_for_action( '<+ base_pathpart +>list' ) %]">List</a>
 
 __wrapper__
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
@@ -236,14 +249,10 @@ __wrapper__
 </div>
 </body>
 </html>
+
 __login__
 [% widget %]
-__edit__
-[% widget %]
-<br>
-<a href="[% c.uri_for( 'list' ) %]">List</a>
-<hr>
-[% form %]
+
 __pager__
 [% IF pager %]
 <div class="pager">
@@ -275,12 +284,6 @@ __pager__
    </div>
 </div>
 [% END %]
-
-__destroy__
-[% destroywidget %]
-<br>
-<a href="[% c.uri_for( 'list' ) %]">List</a>
-
 
 __restricted__
 This is the restricted area - available only after loggin in.

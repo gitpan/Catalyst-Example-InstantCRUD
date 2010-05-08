@@ -17,13 +17,13 @@ sub model_pks {
     return @pks;
 }
 
-sub create_form : Local {
+sub create_form : Action {
     my ( $self, $c, @pks ) = @_; 
     $self->edit( $c, @pks );
     $c->stash( template => 'edit.tt' );
 }
 
-sub by_id : Local : ActionClass('REST') { }
+sub by_id : Action : ActionClass('REST') { }
 
 sub _get_form {
     my( $self, $c, $pks ) = @_;
@@ -47,7 +47,7 @@ sub _get_form {
 }
     
 
-sub by_id_GET : Local {
+sub by_id_GET : Action {
     my ( $self, $c, @args ) = @_; 
     my @model_pks = $self->model_pks( $c );
     my @pks = @args[ 0 .. scalar @model_pks - 1 ];
@@ -62,7 +62,7 @@ sub by_id_GET : Local {
     $c->stash( template => $view_type . '.tt' );
 }
 
-sub by_id_PUT : Local {
+sub by_id_PUT : Action {
     my ( $self, $c, @args ) = @_; 
     my @model_pks = $self->model_pks( $c );
     my @pks = @args[ 0 .. scalar @model_pks - 1 ];
@@ -70,7 +70,9 @@ sub by_id_PUT : Local {
     if( $form->process ){
         my $item = $form->item;
         my @new_pks = map { $item->$_ } @model_pks;
-        $c->res->redirect( $c->uri_for( 'by_id', @new_pks ) );
+        $c->res->redirect(
+            $c->uri_for( $self->action_for('by_id'), @new_pks )
+        );
     }
     else{ 
         $c->stash( form => $form );

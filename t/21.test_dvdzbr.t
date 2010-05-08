@@ -91,7 +91,7 @@ $mech->submit_form(
 #     }
 # );
 $mech->content_contains('Zbigniew Lukasiak', "User added");
-$mech->get_ok("/user/list", "Listing Users");
+$mech->get_ok("/user", "Listing Users");
 $mech->content_contains("Zbigniew Lukasiak", "User listed");
 
 $mech->get_ok("/dvd/edit", "Adding a DVD with a related Tag");
@@ -119,7 +119,7 @@ $mech->submit_form(
 
 $mech->content_contains('Jurassic Park II', "DVD added");
 $mech->content_like(qr/Tags[^A]+Action/, "DVD added with Tag");
-$mech->get_ok("/dvd/list", "Listing DVD's");
+$mech->get_ok("/dvd", "Listing DVD's");
 $mech->content_contains("Jurassic Park II", "DVD Listed");
 $mech->content_contains("Action", "Related Tag Listed");
 
@@ -142,7 +142,7 @@ $mech->submit_form(
     }
 );
 $mech->content_like(qr/Name[^B]+Big Fish/, "DVD eddited");
-$mech->get_ok("/dvd/list", "Listing DVD's");
+$mech->get_ok("/dvd", "Listing DVD's");
 $mech->content_contains("Big Fish", "DVD Listed");
 
 
