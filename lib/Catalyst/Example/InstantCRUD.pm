@@ -1,14 +1,10 @@
 package Catalyst::Example::InstantCRUD;
 
-$VERSION = '0.036';
+$VERSION = '0.037';
 
 use warnings;
 use strict;
 use Carp;
-
-
-# Module implementation here
-
 
 1; # Magic true value required at end of module
 __END__

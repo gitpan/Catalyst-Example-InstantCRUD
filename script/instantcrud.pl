@@ -217,7 +217,7 @@ sub create_example_db {
     my $filename = shift;
     my $dsn ||= 'dbi:SQLite:dbname=' . $filename;
     my $dbh = DBI->connect( $dsn ) or die "Cannot connect to $dsn\n";
-    $dbh->{unicode} = 1;
+    $dbh->{'sqlite_unicode'} = 1;
 
     my $sql;
     {
@@ -230,6 +230,7 @@ sub create_example_db {
 #        warn "executing: \n$statement";
         $dbh->do($statement) or die $dbh->errstr;
     }
+    $dbh->disconnect;
 }
 
 

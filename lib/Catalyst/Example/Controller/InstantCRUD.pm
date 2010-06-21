@@ -81,15 +81,20 @@ END
     }
 }
 
-sub edit : Action {
-    my ( $self, $c, @pks ) = @_; 
+sub build_form {
+    my ( $self, $c, @pks ) = @_;
     my @ids;
     @ids = ( item_id => [ @pks ] ) if @pks;
-    my $form = $self->form_class->new( 
+    return $self->form_class->new( 
         schema => $self->model_schema($c), 
         params => $c->req->params, 
         @ids,
     );
+}
+
+sub edit : Action {
+    my ( $self, $c, @pks ) = @_; 
+    my $form = $self->build_form($c, @pks);
     my $item = $form->item;
     if( $c->req->method eq 'POST' && $form->process() ){
         $item = $form->item;
