@@ -1,5 +1,9 @@
 Revision history for Catalyst-Example-InstantCRUD
 
+0.038 Thu Mar 24 21:39:00 CET 2011
+    - using Lingua::EN::Inflect::Phrase instead of the inflect method in 
+    DBIx::Class::Schema::Loader::RelBuilder
+
 0.037 Mon Jun 21, 2010
     - add build_form hook
     - bugfixes for creation step of example db

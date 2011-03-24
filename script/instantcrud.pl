@@ -15,6 +15,7 @@ use DBIx::Class::Schema::Loader qw/ make_schema_at /;
 use DBIx::Class::Schema::Loader::RelBuilder;
 use List::Util qw(first);
 use DBI;
+use Lingua::EN::Inflect::Phrase;
 use utf8;
 
 my $appname = $ARGV[0];
@@ -167,7 +168,6 @@ sub guess_m2m {
     my $schema = shift;
     my %m2m;
     my %bridges;
-    my $inflector       = DBIx::Class::Schema::Loader::RelBuilder->new;
 
     CLASS:
     for my $s ( $schema->sources ) {
@@ -199,12 +199,12 @@ sub guess_m2m {
             push @rclasses, { rclass => $rclass_name, bridge => [ $found, $rel ] };
         }
         push @{$m2m{ $rclasses[0]->{rclass} }}, [ 
-            $inflector->_inflect_plural( $rclasses[1]->{bridge}[1] ), 
+            Lingua::EN::Inflect::Phrase::to_PL( $rclasses[1]->{bridge}[1] ), 
             $rclasses[1]->{bridge}[0], 
             $rclasses[1]->{bridge}[1] 
         ];
         push @{$m2m{ $rclasses[1]->{rclass} }}, [ 
-            $inflector->_inflect_plural( $rclasses[0]->{bridge}[1] ), 
+            Lingua::EN::Inflect::Phrase::to_PL( $rclasses[0]->{bridge}[1] ), 
             $rclasses[0]->{bridge}[0], 
             $rclasses[0]->{bridge}[1] 
         ];

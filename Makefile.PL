@@ -16,6 +16,7 @@ WriteMakefile(
         'DBIx::Class::Schema::Loader'                            => '0.03',
         'DBIx::Class::ResultSet::RecursiveUpdate'                => 0,
         'DBIx::Class::UTF8Columns'                               => 0,
+        'Lingua::EN::Inflect::Phrase'                            => 0,
 #        'DBIx::Class::DigestColumns'                             => 0,
 #        'Template::Plugin::Class'                                => 0,
         'Catalyst::Model::DBIC::Schema'                          => 0.29,

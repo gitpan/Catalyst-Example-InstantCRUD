@@ -1,6 +1,6 @@
 package Catalyst::Example::InstantCRUD;
 
-$VERSION = '0.037';
+$VERSION = '0.038';
 
 use warnings;
 use strict;
@@ -75,6 +75,9 @@ the Catalyst wiki.
 
 svn: http://dev.catalystframework.org/repos/Catalyst/trunk/Catalyst-Example-InstantCRUD
 
+=head1 SEE ALSO
+
+L<WebNano> - my new project.
 
 =head1 BUGS AND LIMITATIONS
  

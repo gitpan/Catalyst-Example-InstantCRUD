@@ -12,7 +12,7 @@ eval "use Test::WWW::Mechanize::Catalyst 'My::App'";
 if ($@){
     plan skip_all => "Test::WWW::Mechanize::Catalyst required for testing application";
 }else{
-    plan tests => 22;
+    plan tests => 24;
 }
 
 my $mech = Test::WWW::Mechanize::Catalyst->new;
@@ -39,9 +39,11 @@ $mech->submit_form(
     }
 );
 $mech->follow_link_ok({text => 'Firsttable'}, "Click on firsttable");
+$mech->follow_link_ok({text => 'Varfield'}, "Sort by Varfield");
 $mech->content_contains("Changed varchar field", "Record changed");
 $mech->get_ok("/firsttable/destroy/2", "Destroy 2nd record");
 $mech->submit_form( form_number => 1 );
+$mech->follow_link_ok({text => 'Varfield'}, "Sort by Varfield");
 $mech->content_lacks("Changed varchar field", "Record deleted");
 
 $mech->follow_link_ok({text => 'ComposedKey'}, "Click on composed key table");

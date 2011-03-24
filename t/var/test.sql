@@ -56,8 +56,8 @@ usr integer,
 foreign key (usr) references usr(id)
 );
 CREATE TABLE composed_key(
-    id1 integer,
-    id2 integer,
+    id1 int,
+    id2 int,
     value varchar(32),
     primary key (id1, id2)
 );
